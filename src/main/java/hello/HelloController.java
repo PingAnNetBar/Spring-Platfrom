@@ -1,5 +1,7 @@
 package hello;
 
+import hello.service.User;
+import hello.service.UserService;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import hello.service.OrderService;
@@ -8,16 +10,18 @@ import javax.inject.Inject;
 
 @RestController
 public class HelloController {
-    private OrderService orderservice;
+
+    private UserService userservice;
 
     @Inject
-    public HelloController(OrderService orderservice) {
-        this.orderservice = orderservice;
+    public HelloController(UserService userservice) {
+        this.userservice = userservice;
     }
 
     @RequestMapping("/")
-    public String index() {
-        return "Greetings from Spring Boot!";
+    public User index() {
+        return this.userservice.getUserById(1);
+        //return "Greetings from Spring Boot!";
     }
 
 }
