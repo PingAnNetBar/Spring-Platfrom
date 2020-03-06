@@ -10,8 +10,9 @@ public class OrderService {
         this.userservice = userservice;
     }
 
-    //It's a test for simulate Dependency Injection
-    public void placeOrder(Integer userId, String good) {
-        userservice.getUserById(userId);
-    }
+//    //It's a test for simulate Dependency Injection
+//    public void placeOrder(Integer userId, String good) {
+//        userservice.getUserById(userId);
+//    }
+
 }
