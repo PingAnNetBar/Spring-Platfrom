@@ -1,12 +1,15 @@
 package hello.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.inject.Inject;
 import java.time.Instant;
 
 public class User {
 
-    int id;
+    Integer id;
     String username;
+    @JsonIgnore
     String encryptedPassword;
     String avatar;
     Instant createdAt;
@@ -64,14 +67,6 @@ public class User {
     public void setUpdateAt(Instant updateAt) {
         this.updateAt = updateAt;
     }
-
-//    public User(int id, String username) {
-////        this.id = id;
-////        this.username = username;
-////        this.avatar = "";
-////        this.createdAt = Instant.now();
-////        this.updateAt = Instant.now();
-////    }
 
 
 }
