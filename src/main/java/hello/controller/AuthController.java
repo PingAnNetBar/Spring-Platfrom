@@ -7,7 +7,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -36,12 +35,36 @@ public class AuthController {
         User loggedInUser = userService.getUserByUsername(userName);
 
         if (loggedInUser == null) {
-            return new Result("OK", "用户尚没有登陆", false);
+            return new Result("ok", "用户尚没有登陆", false);
         } else {
-            return new Result("OK", null, true, loggedInUser);
+            return new Result("ok", null, true, loggedInUser);
+        }
+    }
+
+    @PostMapping("/auth/register")
+    @ResponseBody
+    public Result register(@RequestBody Map<String, String> usernameAndPasswordJson) {
+        String username = usernameAndPasswordJson.get("username");
+        String password = usernameAndPasswordJson.get("password");
+
+        if (username == null || password == null) {
+            return new Result("fail", "用户名或密码为空", false);
+        }
+        if (username.length() < 1 || username.length() > 15) {
+            return new Result("fail", "用户名长度为1到15个字符", false);
+        }
+        if (password.length() < 6 || password.length() > 16) {
+            return new Result("fail", "密码长度为6到16个任意字符", false);
         }
 
+        User user = userService.getUserByUsername(username);
 
+        if (user == null) {
+            userService.save(username, password);
+            return new Result("ok", "success!", false, userService.getUserByUsername(username));
+        } else {
+            return new Result("fail", "用户已存在", false);
+        }
     }
 
     @PostMapping("/auth/login")
@@ -59,13 +82,27 @@ public class AuthController {
         try {
             authenticationmanager.authenticate(token);
             SecurityContextHolder.getContext().setAuthentication(token);
-            return new Result("OK", "登陆成功", true, userService.getUserByUsername(username));
+            return new Result("ok", "登陆成功", true, userService.getUserByUsername(username));
         } catch (BadCredentialsException e) {
             return new Result("fail", "密码不正确", false);
         }
-
     }
 
+    @GetMapping("/auth/logout")
+    @ResponseBody
+    public Object logout() {
+
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        User loggedInUser = userService.getUserByUsername(userName);
+
+        if (loggedInUser == null) {
+            return new Result("fail", "用户尚没有登陆", false);
+        } else {
+            SecurityContextHolder.clearContext();
+            return new Result("ok", "注销成功", false);
+        }
+
+    }
 
     private static class Result {
         private String status;
@@ -99,5 +136,6 @@ public class AuthController {
         public Object getData() {
             return data;
         }
+
     }
 }
