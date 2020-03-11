@@ -5,6 +5,7 @@ import hello.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -30,12 +31,12 @@ public class AuthController {
     @GetMapping("/auth")
     @ResponseBody
     public Object auth() {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        User loggedInUser = userService.getUserByUsername(userName);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User loggedInUser = userService.getUserByUsername(authentication == null ? null : authentication.getName());
 
         if (loggedInUser == null) {
-            return new Result("ok", "用户尚没有登陆", false);
+            return new Result("ok", "The user didn't login", false);
         } else {
             return new Result("ok", null, true, loggedInUser);
         }
@@ -76,13 +77,13 @@ public class AuthController {
         try {
             userdetails = userService.loadUserByUsername(username);
         } catch (UsernameNotFoundException e) {
-            return new Result("fail", "用户不存在", false);
+            return new Result("fail", "The username doesn't exist.", false);
         }
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userdetails, password, userdetails.getAuthorities());
         try {
             authenticationmanager.authenticate(token);
             SecurityContextHolder.getContext().setAuthentication(token);
-            return new Result("ok", "登陆成功", true, userService.getUserByUsername(username));
+            return new Result("ok", "success", true, userService.getUserByUsername(username));
         } catch (BadCredentialsException e) {
             return new Result("fail", "密码不正确", false);
         }
