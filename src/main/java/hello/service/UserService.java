@@ -1,7 +1,7 @@
 package hello.service;
 
 import hello.entity.User;
-import hello.mapper.UserMapper;
+import hello.dao.UserMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.util.Collections;
+
 @Component
 public class UserService implements UserDetailsService {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -39,5 +40,9 @@ public class UserService implements UserDetailsService {
         }
 
         return new org.springframework.security.core.userdetails.User(username, user.getEncryptedPassword(), Collections.EMPTY_LIST);
+    }
+
+    public User getUserById(Integer userId) {
+        return this.userMapper.getUserById(userId);
     }
 }
