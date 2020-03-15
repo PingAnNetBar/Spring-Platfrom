@@ -1,0 +1,5 @@
+hello\SmokeTest.class
+hello\controller\AuthControllerTest.class
+hello\service\BlogServiceTest.class
+hello\integration\MyIntegrationTest.class
+hello\service\UserServiceTest.class

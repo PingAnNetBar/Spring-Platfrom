@@ -3,11 +3,11 @@ package hello.controller;
 import hello.entity.LoginResult;
 import hello.entity.Result;
 import hello.entity.User;
+import hello.service.AuthService;
 import hello.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,28 +24,24 @@ import static hello.entity.LoginResult.failure;
 public class AuthController {
     private AuthenticationManager authenticationmanager;
     private UserService userService;
-
+    private final AuthService authService;
 
     @Inject
-    public AuthController(AuthenticationManager authenticationmanager, UserService userService) {
+    public AuthController(AuthenticationManager authenticationmanager, UserService userService, AuthService authService) {
         this.authenticationmanager = authenticationmanager;
         this.userService = userService;
+        this.authService = authService;
     }
 
 
     @GetMapping("/auth")
     @ResponseBody
-    public Result auth() {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User loggedInUser = userService.getUserByUsername(authentication == null ? null : authentication.getName());
-
-        if (loggedInUser == null) {
-            return LoginResult.success("The user didn't login", false);
-        } else {
-            return LoginResult.success(null, true, loggedInUser);
-        }
+    public LoginResult auth() {
+        return authService.getCurrentUser()
+                .map(LoginResult::success)
+                .orElse(LoginResult.success("The user didn't login", false));
     }
+
 
     @PostMapping("/auth/register")
     @ResponseBody
@@ -70,9 +66,8 @@ public class AuthController {
 
         if (user == null) {
             userService.save(username, password);
-            return LoginResult.success( "success!", false, userService.getUserByUsername(username));
+            return LoginResult.success("注册成功", userService.getUserByUsername(username));
         } else {
-//            return new Result("fail", "用户已存在", false);
             return failure("用户已存在");
         }
     }
@@ -80,23 +75,29 @@ public class AuthController {
 
     @PostMapping("/auth/login")
     @ResponseBody
-    public Result login(@RequestBody Map<String, String> usernameAndPasswordJson) {
-        String username = usernameAndPasswordJson.get("username");
-        String password = usernameAndPasswordJson.get("password");
-        UserDetails userdetails = null;
+    public Object login(@RequestBody Map<String, Object> usernameAndPassword) {
+
+        String username = usernameAndPassword.get("username").toString();
+        String password = usernameAndPassword.get("password").toString();
+
+        UserDetails userDetails;
         try {
-            userdetails = userService.loadUserByUsername(username);
+            userDetails = userService.loadUserByUsername(username);
         } catch (UsernameNotFoundException e) {
-//            return new Result("fail", "The username doesn't exist.", false);
-            return failure("The username doesn't exist");
+            return LoginResult.failure("用户不存在");
         }
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userdetails, password, userdetails.getAuthorities());
+
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
+
         try {
             authenticationmanager.authenticate(token);
+            // 把用户信息保存在一个地方
+            //   Cookie
             SecurityContextHolder.getContext().setAuthentication(token);
-            return LoginResult.success("success", true, userService.getUserByUsername(username));
+
+            return LoginResult.success("登录成功", userService.getUserByUsername(username));
         } catch (BadCredentialsException e) {
-            return failure("密码不正确");
+            return LoginResult.failure("密码不正确");
         }
     }
 
@@ -108,7 +109,6 @@ public class AuthController {
         User loggedInUser = userService.getUserByUsername(userName);
 
         if (loggedInUser == null) {
-//            return new Result("fail", "用户尚没有登陆", false);
             return failure("用户尚没有登陆");
         } else {
             SecurityContextHolder.clearContext();

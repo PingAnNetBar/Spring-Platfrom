@@ -2,33 +2,31 @@ package hello.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.inject.Inject;
 import java.time.Instant;
 
 public class User {
-
     Integer id;
     String username;
     @JsonIgnore
     String encryptedPassword;
     String avatar;
     Instant createdAt;
-    Instant updateAt;
+    Instant updatedAt;
 
-    public User(int id, String username, String encryptedPassword) {
+    public User(Integer id, String username, String encryptedPassword) {
         this.id = id;
         this.username = username;
         this.encryptedPassword = encryptedPassword;
-        this.avatar = "";
+        this.avatar = "https://blog-server.hunger-valley.com/avatar/69.jpg";
         this.createdAt = Instant.now();
-        this.updateAt = Instant.now();
+        this.updatedAt = Instant.now();
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -40,14 +38,6 @@ public class User {
         this.username = username;
     }
 
-    public String getEncryptedPassword() {
-        return encryptedPassword;
-    }
-
-    public void setEncryptedPassword(String encryptedPassword) {
-        this.encryptedPassword = encryptedPassword;
-    }
-
     public String getAvatar() {
         return avatar;
     }
@@ -56,17 +46,27 @@ public class User {
         return createdAt;
     }
 
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public String getEncryptedPassword() {
+        return encryptedPassword;
+    }
+
+    public void setEncryptedPassword(String encryptedPassword) {
+        this.encryptedPassword = encryptedPassword;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Instant getUpdateAt() {
-        return updateAt;
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
     }
-
-    public void setUpdateAt(Instant updateAt) {
-        this.updateAt = updateAt;
-    }
-
-
 }
