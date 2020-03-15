@@ -83,6 +83,7 @@ public class BlogController {
         String content = params.get("content");
         String description = params.get("description");
 
+
         AssertUtils.assertTrue(StringUtils.isNotBlank(title) && title.length() < 100, "title is invalid!");
         AssertUtils.assertTrue(StringUtils.isNotBlank(content) && content.length() < 10000, "content is invalid");
 
